@@ -34,9 +34,11 @@
  */
 (function() {
 	var loggers = {};
-	var root = this;
 	var publicFns = {};
+	var root = this;
+
 	var defaultAppenders = [];
+	var defaultLevel = types.INFO;
 
 	// OFF is just a really low setting
 	publicFns.OFF = Number.MIN_VALUE;
@@ -67,6 +69,7 @@
 			appenders.forEach(function(appender) {
 				appender.call(this, logName, levelName, arrayArgs);
 			});
+			return loggerPublicFns;
 		}
 
 		for(var name in types) {
@@ -84,6 +87,7 @@
 
 		loggerPublicFns.setLevel = function(level) {
 			logLevel = level;
+			return loggerPublicFns;
 		};
 
 		loggerPublicFns.addAppender = function(appenderFn) {
@@ -97,6 +101,7 @@
 			if(hasAppender) return;
 
 			appenders.push(appenderFn);
+			return loggerPublicFns;
 		};
 
 		defaultAppenders.forEach(function(appender) {loggerPublicFns.addAppender(appender)});
@@ -174,7 +179,6 @@
 		return publicFns;
 	}
 
-	var defaultLevel = types.INFO;
 	for(var propName in types) { publicFns[propName.toUpperCase()] = types[propName]; }
 
 	if (typeof exports !== 'undefined') {

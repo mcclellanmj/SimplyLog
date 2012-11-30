@@ -96,6 +96,16 @@ SimplyLog currently supports the following logging levels in order of highest le
 You can setup SimplyLog to automatically set the logging level for all logs built by it by calling
 `SimplyLog.setDefaultLevel(SimplyLog.{level});`
 
+#### Default Appenders
+Adding a default appender will cause every log created after that point to also have that appender.  You can add default appenders by calling the method 
+
+	SimplyLog.addDefaultAppender(/*function(name, level, args) {}*/);
+
+The arguments for the function you pass are
+- name - The name of the logger that is appending
+- level -  The level of the message it is appending
+- args - All the args passed to the logging statement
+
 Appenders
 ---------
 Appenders are a way of allowing the log system to be extended, anything you can code can be called as an appender.  Any number of appenders can be added to a logger to allow  Tutorial and more complex appenders to come, to get started now take a look at the defaultConsoleAppender in `simply-log.js`, or take a look at the example below which is a copy of the defaultConsoleAppender but adds the timestamp.  Please note that adding more default appenders but using SimplyLog.consoleAppender will cause you to get a consoleAppender with all extra default appenders attached as well.
