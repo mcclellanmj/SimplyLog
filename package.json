@@ -6,8 +6,8 @@
 	"contributors" : [],
 	"dependencies" : [],
 	"repository" : {"type" : "git", "url" : "git://github.com/mcclellanmj/SimplyLog.git"},
-	"main" : "simplyLog.js",
-	"version" : "0.2.2",
+	"main" : "simply-log.js",
+	"version" : "0.2.3",
 	"license": "GPL",
 	"homepage" : "https://github.com/mcclellanmj/SimplyLog"
 }
