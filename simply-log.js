@@ -4,7 +4,7 @@
  */
 
 /**
- * @version v0.1
+ * @version v0.2.0
  * Api is likely to change
  * @author MATT MCCLELLAN
  * @beta
@@ -12,27 +12,29 @@
  * This is a simple wrapper around console.log that allows you to control level
  * The functions available to this are 
  * 
- * logjs.createLogger(name, level)
- *   --example var log = logjs.createLogger('logjs', logjs.TRACE)
+ * SimplyLog.createLogger(name, level)
+ *   --example var log = SimplyLog.createLogger('SimplyLog', SimplyLog.TRACE)
  *
- * the logjs level properties should always be used to prevent clashing with refactors.	
+ * the SimplyLog level properties should always be used to prevent clashing with refactors.	
  * The hierarchy of the loggers are listed below with
- * logjs.OFF -- turns off all logging
- * logjs.ERROR -- Error level logging, highest level, always outputs unless off
- * logjs.INFO -- Info level logging, highest level
- * logjs.WARN -- Warnings
- * logjs.DEBUG -- Debug level
- * logjs.TRACE -- Ultra verbose trace logging
+ * SimplyLog.OFF -- turns off all logging
+ * SimplyLog.ERROR -- Error level logging, highest level, always outputs unless off
+ * SimplyLog.INFO -- Info level logging, highest level
+ * SimplyLog.WARN -- Warnings
+ * SimplyLog.DEBUG -- Debug level
+ * SimplyLog.TRACE -- Ultra verbose trace logging
  *
  * Once you have a logger the following functions can be called
  * log.info(msg)
  * log.debug(msg)
  * log.error(msg)
  * log.trace(msg)
- * @return logjs object
+ * @return SimplyLog object
  * 
  */
-var logjs = (function() {
+(function() {
+	var loggers = {};
+	var root = this;
 	var publicFns = {};
 
 	// OFF is just a really low setting
@@ -60,9 +62,10 @@ var logjs = (function() {
 
 		logMsg = function(args, levelName) {
 			var arrayArgs = Array.prototype.slice.call(args);
-			for(var i in appenders) {
-				appenders[i].call(this, logName, levelName, arrayArgs);
-			}
+
+			appenders.forEach(function(appender) {
+				appender.call(this, logName, levelName, arrayArgs);
+			});
 		}
 
 		for(var name in types) {
@@ -83,6 +86,14 @@ var logjs = (function() {
 		};
 
 		loggerPublicFns.addAppender = function(appenderFn) {
+			appenders.forEach(function(entry) {
+				if(entry == appenderFn) {
+					console.log('already have appender', appenderFn);
+					return;
+				}
+			});
+
+			console.log("Adding appender")
 			appenders.push(appenderFn);
 		};
 
@@ -97,20 +108,32 @@ var logjs = (function() {
 	 * @since v0.1
 	 * 
 	 */
-	publicFns.emptyLogger = function(name) {
-		return logger(name, defaultLevel);
+	publicFns.getLogger = function(name) {
+		if(loggers[name] != undefined) {
+			return loggers[name];
+		}
+
+		loggers[name] = logger(name, defaultLevel);
+		return loggers[name];
 	}
 
 	/**
-	 * Creates a new logger
+	 * Creates a console logger, this may have more appenders than just console but it is
+	 * guaranteed to have at least a default console logger
 	 * @param  String name  name of the logger to create
 	 * @param  Integer level initial logging level
 	 * @return Log       log object @see logger
 	 * @since v0.1
 	 */
 	publicFns.consoleLogger = function(name) {
+		if(loggers[name] != undefined) {
+			loggers[name].addAppender(publicFns.defaultConsoleAppender);
+			return loggers[name];
+		}
+
 		var newLog = logger(name, defaultLevel);
 		newLog.addAppender(publicFns.defaultConsoleAppender);
+		loggers[name] = newLog;
 		return newLog;
 	}
 
@@ -122,7 +145,7 @@ var logjs = (function() {
 	 * @param  {Array} args  the arguments passed by the user
 	 */
 	publicFns.defaultConsoleAppender = function(name, level, args) {
-		if(window.console) {
+		if(console) {
 			args.unshift(name + ':' + level + ' ->');
 			Function.prototype.apply.call(console.log, console, args);
 		}
@@ -138,5 +161,15 @@ var logjs = (function() {
 
 	var defaultLevel = types.INFO;
 	for(var propName in types) { publicFns[propName.toUpperCase()] = types[propName]; }
-	return publicFns;
-})();
+
+	if (typeof exports !== 'undefined') {
+		if (typeof module !== 'undefined' && module.exports) {
+			exports = module.exports = publicFns;
+		}
+
+		exports = publicFns;
+	} else {
+		root['SimplyLog'] = publicFns;
+	}
+
+}).call(this);

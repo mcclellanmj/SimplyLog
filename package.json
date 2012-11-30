@@ -1,0 +1,13 @@
+{
+	"name" : "simply-log",
+	"description" : "An attempt at a extremely simple logger, which is easy to extend with code and not silly config.",
+	"keywords" : ["util", "log", "logger", "system", "client"],
+	"author" : "Matt McClellan <mcclellan.mj@gmail.com>",
+	"contributors" : [],
+	"dependencies" : [],
+	"repository" : {"type" : "git", "url" : "git://github.com/mcclellanmj/SimplyLog.git"},
+	"main" : "simplyLog.js",
+	"version" : "0.2.0",
+	"license": "GPL",
+	"homepage" : "https://github.com/mcclellanmj/SimplyLog"
+}
