@@ -98,4 +98,11 @@ You can setup SimplyLog to automatically set the logging level for all logs buil
 
 Appenders
 ---------
-Appenders are a way of allowing the log system to be extended, anything you can code can be called as an appender.  Any number of appenders can be added to a logger to allow  Tutorial and more complex appenders to come, to get started now take a look at the defaultConsoleAppender in `simply-log.js`.
+Appenders are a way of allowing the log system to be extended, anything you can code can be called as an appender.  Any number of appenders can be added to a logger to allow  Tutorial and more complex appenders to come, to get started now take a look at the defaultConsoleAppender in `simply-log.js`, or take a look at the example below which is a copy of the defaultConsoleAppender but adds the timestamp.  Please note that adding more default appenders but using SimplyLog.consoleAppender will cause you to get a consoleAppender with all extra default appenders attached as well.
+
+	var logFactory = require('simply-log');
+
+	logFactory.addDefaultAppender(function(name, level, args) {
+			args.unshift(Date.now() + ' ' + name + ':' + level + ' ->');
+			Function.prototype.apply.call(console.log, console, args);
+	});

@@ -36,6 +36,7 @@
 	var loggers = {};
 	var root = this;
 	var publicFns = {};
+	var defaultAppenders = [];
 
 	// OFF is just a really low setting
 	publicFns.OFF = Number.MIN_VALUE;
@@ -98,6 +99,8 @@
 			appenders.push(appenderFn);
 		};
 
+		defaultAppenders.forEach(function(appender) {loggerPublicFns.addAppender(appender)});
+
 		return loggerPublicFns;
 	}
 
@@ -153,11 +156,22 @@
 	}
 
 	/**
+	 * Adds another default appender that will be added to all new loggers
+	 * @param {Function} The appender to add
+	 * @since 0.2.4
+	 */
+	publicFns.addDefaultAppender = function(appender) {
+		defaultAppenders.push(appender);
+		return publicFns;
+	}
+
+	/**
 	 * Sets the default level for all logs built from this, these can be overridden manually
 	 * @param {Integer} level Level to set logging at
 	 */
 	publicFns.setDefaultLevel = function(level) {
 		defaultLevel = level;
+		return publicFns;
 	}
 
 	var defaultLevel = types.INFO;
