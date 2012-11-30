@@ -41,6 +41,7 @@ Usage in Node
 Other Notes
 -----------
 SimplyLog keeps track of all loggers you create within it, this means you can reuse loggers in different parts of your app as long as SimplyLog is at the root.  For instance
+
 	var logger = require('simply-log')
 
 	logger.getLogger('stuffLogger').setLevel(logger.TRACE);
@@ -64,6 +65,7 @@ SimplyLog keeps track of all loggers you create within it, this means you can re
 	doStuff();
 
 Output from the above code chunk is, trace is turned off for our second call
+
 	stuffLogger:info -> Info World
 	stuffLogger:trace -> Trace World
 	stuffLogger:info -> Info World
