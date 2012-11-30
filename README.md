@@ -47,7 +47,9 @@ SimplyLog keeps track of all loggers you create within it, this means you can re
 
 	var doStuff = function() {
 		// Do some stuff
-		logger.consoleLogger('stuffLogger').trace('Hello World')
+		var myLog = logger.consoleLogger('stuffLogger');
+		myLog.info("Info World");
+		myLog.trace("Trace World");
 	}
 
 	var adjustLogging = function(level) {
@@ -55,12 +57,17 @@ SimplyLog keeps track of all loggers you create within it, this means you can re
 		logger.getLogger('stuffLogger').setLevel(level);
 	}
 
-	// Will print hello world
 	doStuff();
 
+	// Turn down logging to level of INFO, this will turn off the TRACE
 	adjustLogging(logger.INFO)
-	// Will not print hello world
 	doStuff();
+
+Output from the above code chunk is, trace is turned off for our second call
+	stuffLogger:info -> Info World
+	stuffLogger:trace -> Trace World
+	stuffLogger:info -> Info World
+
 
 API Crash Course
 ----------------

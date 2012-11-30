@@ -86,14 +86,15 @@
 		};
 
 		loggerPublicFns.addAppender = function(appenderFn) {
+			var hasAppender = false;
 			appenders.forEach(function(entry) {
 				if(entry == appenderFn) {
-					console.log('already have appender', appenderFn);
+					hasAppender = true;
 					return;
 				}
 			});
+			if(hasAppender) return;
 
-			console.log("Adding appender")
 			appenders.push(appenderFn);
 		};
 
