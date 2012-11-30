@@ -1,8 +1,8 @@
 SimplyLog
 =====
 - - -
-SimplyLog is a project meant to bring more flexible and controllable logging into javascript.
-The primary goals are extensibility, simplicity, and compatibility.  omething that allows developers to quickly turn logging on and off as they are debugging a site, and even control
+SimplyLog is a project meant to bring flexible and controllable logging into javascript.
+The primary goals are extensibility, simplicity, and compatibility.  Something that allows developers to quickly turn logging on and off as they are debugging a site, and even control
 the amount of logging that gets output.  In addition to allowing a developer or a team 
 to attach more information to the debugging.  And for teams allowing a standard logging style to be setup for their projects.
 
@@ -38,8 +38,8 @@ Usage in Node
 	var myLog = logger.consoleLogger('myLog');
 	myLog.setLevel(logger.TRACE);
 
-Another Notes
--------------
+Other Notes
+-----------
 SimplyLog keeps track of all loggers you create within it, this means you can reuse loggers in different parts of your app as long as SimplyLog is at the root.  For instance
 	var logger = require('simply-log')
 
@@ -65,7 +65,7 @@ SimplyLog keeps track of all loggers you create within it, this means you can re
 API Crash Course
 ----------------
 #### Logging a message
-Messages are sent to the log appenders by calling the appropriate console log level method.
+Messages are sent to the log appenders by calling the appropriate log level method.
 The method to call is always the level you want to send in all lower case.
 As of now the current levels are error, info, warn, debug, trace.
 Any number of arguments can be passed to these methods
@@ -89,4 +89,4 @@ You can setup SimplyLog to automatically set the logging level for all logs buil
 
 Appenders
 ---------
-Appenders are a way of allowing the log system to be extended, anything you can code can be called as an appender.  Any number of appenders can be added to a logger to allow  Tutorial and more complex appenders to come, to get started now take a look at the defaultConsoleAppender in `src/js/SimplyLog.js`.
+Appenders are a way of allowing the log system to be extended, anything you can code can be called as an appender.  Any number of appenders can be added to a logger to allow  Tutorial and more complex appenders to come, to get started now take a look at the defaultConsoleAppender in `simply-log.js`.
