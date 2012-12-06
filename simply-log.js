@@ -33,12 +33,10 @@
  * 
  */
 (function() {
-	var loggers = {};
-	var publicFns = {};
+	var loggers = new Object();
 	var root = this;
-
+	var publicFns = new Object();
 	var defaultAppenders = [];
-	var defaultLevel = types.INFO;
 
 	// OFF is just a really low setting
 	publicFns.OFF = Number.MIN_VALUE;
@@ -58,56 +56,56 @@
 	 * @param  Integer level level of logging
 	 * @return functions to interact with the log
 	 */
-	var logger = function(name, level) {
-		var loggerPublicFns = {}, appenders = [];
-		var logName = name;
-		var logLevel = level;
+	var Logger = (function() {
+		function Logger(name, level) {
+			var self = this;
+			self.name = name;
+			self.level = level;
+			self.appenders = [];
 
-		logMsg = function(args, levelName) {
-			var arrayArgs = Array.prototype.slice.call(args);
-
-			appenders.forEach(function(appender) {
-				appender.call(this, logName, levelName, arrayArgs);
+			defaultAppenders.forEach(function(appender) {
+				self.appenders.push(appender);
 			});
-			return loggerPublicFns;
 		}
 
+		Logger.prototype.logMsg = function(args, levelName) {
+			var arrayArgs = Array.prototype.slice.call(args);
+			var self = this;
+
+			this.appenders.forEach(function(appender) {
+				appender.call(self, self.name, levelName, arrayArgs);
+			});
+		}
+
+		Logger.prototype.setLevel = function(level) {
+			this.logLevel = level;
+		}
+
+		Logger.prototype.addAppender = function(appender) {
+			var hasAppender = false;
+			appenders.forEach(function(entry) {
+				if(entry == appenderFn) hasAppender = true;
+			});
+			if(hasAppender) return;
+
+			appenders.push(appenderFn);
+	 	}
+
 		for(var name in types) {
-			loggerPublicFns[name] = (function() {
+			Logger.prototype[name] = (function() {
 				var typeName = name;
-				var level = types[name];
+				var funcLevel = types[name];
 
 				return function() {
-					if(logLevel >= level) {
-						logMsg(arguments, typeName);
+					if(this.level >= funcLevel) {
+						this.logMsg(arguments, typeName);
 					}
 				}
 			})();
 		};
 
-		loggerPublicFns.setLevel = function(level) {
-			logLevel = level;
-			return loggerPublicFns;
-		};
-
-		loggerPublicFns.addAppender = function(appenderFn) {
-			var hasAppender = false;
-			appenders.forEach(function(entry) {
-				if(entry == appenderFn) {
-					hasAppender = true;
-					return;
-				}
-			});
-			if(hasAppender) return;
-
-			appenders.push(appenderFn);
-			return loggerPublicFns;
-		};
-
-		defaultAppenders.forEach(function(appender) {loggerPublicFns.addAppender(appender)});
-
-		return loggerPublicFns;
-	}
+		return Logger;
+	})();
 
 	/** 
 	 * Creates a logger that has no appenders, appenders can be attached
@@ -118,11 +116,11 @@
 	 * 
 	 */
 	publicFns.getLogger = function(name) {
-		if(loggers[name] != undefined) {
+		if(loggers[name] !== undefined) {
 			return loggers[name];
 		}
 
-		loggers[name] = logger(name, defaultLevel);
+		loggers[name] = new Logger(name, defaultLevel);
 		return loggers[name];
 	}
 
@@ -140,7 +138,7 @@
 			return loggers[name];
 		}
 
-		var newLog = logger(name, defaultLevel);
+		var newLog = new Logger(name, defaultLevel);
 		newLog.addAppender(publicFns.defaultConsoleAppender);
 		loggers[name] = newLog;
 		return newLog;
@@ -179,6 +177,7 @@
 		return publicFns;
 	}
 
+	var defaultLevel = types.INFO;
 	for(var propName in types) { publicFns[propName.toUpperCase()] = types[propName]; }
 
 	if (typeof exports !== 'undefined') {
