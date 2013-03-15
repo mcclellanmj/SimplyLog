@@ -64,7 +64,7 @@
 
             for (var appender in defaultAppenders) {
                 if (defaultAppenders.hasOwnProperty(appender)) {
-                    this.appenders.push(appender);
+                    this.appenders.push(defaultAppenders[appender]);
                 }
             }
 		}
@@ -74,13 +74,13 @@
 
             for (var appender in this.appenders) {
                 if (this.appenders.hasOwnProperty(appender)) {
-                    appender.call(this, this.name, levelName, arrayArgs);
+                    this.appenders[appender].call(this, this.name, levelName, arrayArgs);
                 }
             }
 		};
 
         Logger.prototype.isLogged = function(level) {
-            return (level >= this.logLevel);
+            return (level > 0 && level <= this.logLevel);
         };
 
 		Logger.prototype.setLevel = function(level) {
@@ -102,7 +102,7 @@
                 //noinspection JSHint
                 Logger.prototype[name] = (function(typeName, funcLevel) {
                   return function() {
-					if(this.level >= funcLevel) {
+					if(this.level <= funcLevel) {
 						this.logMsg(arguments, typeName);
 					}
                   };
