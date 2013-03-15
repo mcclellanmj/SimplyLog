@@ -32,10 +32,10 @@
  * @return SimplyLog object
  * 
  */
-(function() {
-	var loggers = new Object();
-	var root = this;
-	var publicFns = new Object();
+(function ( global ) {
+    "use strict";
+	var loggers = {};
+	var publicFns = {};
 	var defaultAppenders = [];
 
 	// OFF is just a really low setting
@@ -58,51 +58,57 @@
 	 */
 	var Logger = (function() {
 		function Logger(name, level) {
-			var self = this;
-			self.name = name;
-			self.level = level;
-			self.appenders = [];
+			this.name = name;
+			this.level = level;
+			this.appenders = [];
 
-			defaultAppenders.forEach(function(appender) {
-				self.appenders.push(appender);
-			});
+            for (var appender in defaultAppenders) {
+                if (defaultAppenders.hasOwnProperty(appender)) {
+                    this.appenders.push(appender);
+                }
+            }
 		}
 
 		Logger.prototype.logMsg = function(args, levelName) {
 			var arrayArgs = Array.prototype.slice.call(args);
-			var self = this;
 
-			this.appenders.forEach(function(appender) {
-				appender.call(self, self.name, levelName, arrayArgs);
-			});
-		}
+            for (var appender in this.appenders) {
+                if (this.appenders.hasOwnProperty(appender)) {
+                    appender.call(this, this.name, levelName, arrayArgs);
+                }
+            }
+		};
+
+        Logger.prototype.isLogged = function(level) {
+            return (level >= this.logLevel);
+        };
 
 		Logger.prototype.setLevel = function(level) {
 			this.logLevel = level;
-		}
+		};
 
-		Logger.prototype.addAppender = function(appender) {
-			var hasAppender = false;
-			appenders.forEach(function(entry) {
-				if(entry == appenderFn) hasAppender = true;
-			});
-			if(hasAppender) return;
+		Logger.prototype.addAppender = function(appenderFn) {
+            for (var key in this.appenders) {
+                if (this.appenders.hasOwnProperty(key)) {
+                    if (this.appenders[key] === appenderFn) { return; }
+                }
+            }
+			this.appenders.push(appenderFn);
+        };
 
-			appenders.push(appenderFn);
-	 	}
 
 		for(var name in types) {
-			Logger.prototype[name] = (function() {
-				var typeName = name;
-				var funcLevel = types[name];
-
-				return function() {
+            if (types.hasOwnProperty(name)) {
+                //noinspection JSHint
+                Logger.prototype[name] = (function(typeName, funcLevel) {
+                  return function() {
 					if(this.level >= funcLevel) {
 						this.logMsg(arguments, typeName);
 					}
-				}
-			})();
-		};
+                  };
+                })(name, types[name]);
+            }
+		}
 
 		return Logger;
 	})();
@@ -122,18 +128,18 @@
 
 		loggers[name] = new Logger(name, defaultLevel);
 		return loggers[name];
-	}
+	};
 
 	/**
 	 * Creates a console logger, this may have more appenders than just console but it is
 	 * guaranteed to have at least a default console logger
 	 * @param  String name  name of the logger to create
 	 * @param  Integer level initial logging level
-	 * @return Log       log object @see logger
+	 * @return Logger       log object @see logger
 	 * @since v0.1
 	 */
 	publicFns.consoleLogger = function(name) {
-		if(loggers[name] != undefined) {
+		if(loggers[name] !== undefined && loggers[name] !== null) {
 			loggers[name].addAppender(publicFns.defaultConsoleAppender);
 			return loggers[name];
 		}
@@ -142,7 +148,7 @@
 		newLog.addAppender(publicFns.defaultConsoleAppender);
 		loggers[name] = newLog;
 		return newLog;
-	}
+	};
 
 	/**
 	 * The default console appender, this formats a message as
@@ -156,7 +162,7 @@
 			args.unshift(name + ':' + level + ' ->');
 			Function.prototype.apply.call(console.log, console, args);
 		}
-	}
+	};
 
 	/**
 	 * Adds another default appender that will be added to all new loggers
@@ -166,7 +172,7 @@
 	publicFns.addDefaultAppender = function(appender) {
 		defaultAppenders.push(appender);
 		return publicFns;
-	}
+	};
 
 	/**
 	 * Sets the default level for all logs built from this, these can be overridden manually
@@ -175,19 +181,15 @@
 	publicFns.setDefaultLevel = function(level) {
 		defaultLevel = level;
 		return publicFns;
-	}
+	};
 
-	var defaultLevel = types.INFO;
-	for(var propName in types) { publicFns[propName.toUpperCase()] = types[propName]; }
+	for(var propName in types) {
+        if (types.hasOwnProperty(propName)) {
+            publicFns[propName.toUpperCase()] = types[propName];
+        }
+    }
+    var defaultLevel = types.info;
 
-	if (typeof exports !== 'undefined') {
-		if (typeof module !== 'undefined' && module.exports) {
-			exports = module.exports = publicFns;
-		}
+    global.SimplyLog = publicFns;
 
-		exports = publicFns;
-	} else {
-		root['SimplyLog'] = publicFns;
-	}
-
-}).call(this);
+}( typeof exports === 'undefined' ? window : exports ));
