@@ -32,10 +32,10 @@
  * @return SimplyLog object
  * 
  */
-(function ( global ) {
+
+(function ( publicFns ) {
     "use strict";
 	var loggers = {};
-	var publicFns = {};
 	var defaultAppenders = [];
 
 	// OFF is just a really low setting
@@ -190,6 +190,4 @@
     }
     var defaultLevel = types.info;
 
-    global.SimplyLog = publicFns;
-
-}( typeof exports === 'undefined' ? window : exports ));
+}(typeof exports === 'undefined' ? window.SimplyLog = {} : exports ));
