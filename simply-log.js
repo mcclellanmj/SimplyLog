@@ -1,21 +1,21 @@
 /**
  * Copyright(c) 2012 Matt McClellan
- * Licensed under GPL license
+ * Licensed under BSD license
  */
 
 /**
- * @version v0.2.0
+ * @version v0.2.1
  * Api is likely to change
  * @author MATT MCCLELLAN
  * @beta
- * 
+ *
  * This is a simple wrapper around console.log that allows you to control level
- * The functions available to this are 
- * 
+ * The functions available to this are
+ *
  * SimplyLog.createLogger(name, level)
  *   --example var log = SimplyLog.createLogger('SimplyLog', SimplyLog.TRACE)
  *
- * the SimplyLog level properties should always be used to prevent clashing with refactors.	
+ * the SimplyLog level properties should always be used to prevent clashing with refactors.
  * The hierarchy of the loggers are listed below with
  * SimplyLog.OFF -- turns off all logging
  * SimplyLog.ERROR -- Error level logging, highest level, always outputs unless off
@@ -30,110 +30,126 @@
  * log.error(msg)
  * log.trace(msg)
  * @return SimplyLog object
- * 
+ *
  */
-(function() {
-	var loggers = new Object();
-	var root = this;
-	var publicFns = new Object();
+
+(function (publicFns) {
+	"use strict";
+	var loggers = {};
 	var defaultAppenders = [];
 
 	// OFF is just a really low setting
 	publicFns.OFF = Number.MIN_VALUE;
+	publicFns.useColors = false;
+
+
 
 	var types = {
-		'error' : 1,
-		'info' : 2,
-		'warn' : 3,
-		'debug' : 4,
-		'trace' : 5
+		'error': 1,
+		'info': 2,
+		'warn': 3,
+		'debug': 4,
+		'trace': 5
+	};
+
+	var colors = {
+		'error': '#F00',
+		'info': '#000',
+		'warn': '#FF0',
+		'debug': '#0F0',
+		'trace': '#00F'
 	};
 
 	/**
-	 * Logger object contains methods to be used for logging such as 
+	 * Logger object contains methods to be used for logging such as
 	 * info, error, etc.  As well as a method to change logging, setLogLevel
 	 * @param  String name  name of logger to create
 	 * @param  Integer level level of logging
 	 * @return functions to interact with the log
 	 */
-	var Logger = (function() {
+	var Logger = (function () {
 		function Logger(name, level) {
-			var self = this;
-			self.name = name;
-			self.level = level;
-			self.appenders = [];
+			this.name = name;
+			this.level = level;
+			this.appenders = [];
 
-			defaultAppenders.forEach(function(appender) {
-				self.appenders.push(appender);
-			});
+			for (var appender in defaultAppenders) {
+				if (defaultAppenders.hasOwnProperty(appender)) {
+					this.appenders.push(defaultAppenders[appender]);
+				}
+			}
 		}
 
-		Logger.prototype.logMsg = function(args, levelName) {
+		Logger.prototype.logMsg = function (args, levelName) {
 			var arrayArgs = Array.prototype.slice.call(args);
-			var self = this;
 
-			this.appenders.forEach(function(appender) {
-				appender.call(self, self.name, levelName, arrayArgs);
-			});
-		}
+			for (var appender in this.appenders) {
+				if (this.appenders.hasOwnProperty(appender)) {
+					this.appenders[appender].call(this, this.name, levelName, arrayArgs);
+				}
+			}
+		};
 
-		Logger.prototype.setLevel = function(level) {
-			this.logLevel = level;
-		}
+		Logger.prototype.isLogged = function (level) {
+			return (level > 0 && level <= this.level);
+		};
 
-		Logger.prototype.addAppender = function(appender) {
-			var hasAppender = false;
-			appenders.forEach(function(entry) {
-				if(entry == appenderFn) hasAppender = true;
-			});
-			if(hasAppender) return;
+		Logger.prototype.setLevel = function (level) {
+			this.level = level;
+		};
 
-			appenders.push(appenderFn);
-	 	}
-
-		for(var name in types) {
-			Logger.prototype[name] = (function() {
-				var typeName = name;
-				var funcLevel = types[name];
-
-				return function() {
-					if(this.level >= funcLevel) {
-						this.logMsg(arguments, typeName);
+		Logger.prototype.addAppender = function (appenderFn) {
+			for (var key in this.appenders) {
+				if (this.appenders.hasOwnProperty(key)) {
+					if (this.appenders[key] === appenderFn) {
+						return;
 					}
 				}
-			})();
+			}
+			this.appenders.push(appenderFn);
 		};
+
+
+		for (var name in types) {
+			if (types.hasOwnProperty(name)) {
+				//noinspection JSHint
+				Logger.prototype[name] = (function (typeName, funcLevel) {
+					return function () {
+						if (this.level >= funcLevel) {
+							this.logMsg(arguments, typeName);
+						}
+					};
+				})(name, types[name]);
+			}
+		}
 
 		return Logger;
 	})();
 
-	/** 
-	 * Creates a logger that has no appenders, appenders can be attached
-	 * using the addAppender method on the returned object
-	 * @param {String} name name of the logger
-	 * @param {Integer} level the level of logging active on this logger
-	 * @since v0.1
-	 * 
+	/**
+	 * getLogger - returns an existing logger of this name, or creates a new logger of this name
+	 * @param name
+	 * @returns Logger
 	 */
-	publicFns.getLogger = function(name) {
-		if(loggers[name] !== undefined) {
+	publicFns.getLogger = function (name) {
+		if (loggers[name] !== undefined) {
 			return loggers[name];
 		}
 
 		loggers[name] = new Logger(name, defaultLevel);
 		return loggers[name];
-	}
+	};
 
 	/**
 	 * Creates a console logger, this may have more appenders than just console but it is
 	 * guaranteed to have at least a default console logger
 	 * @param  String name  name of the logger to create
 	 * @param  Integer level initial logging level
-	 * @return Log       log object @see logger
+	 * @return Logger       log object @see logger
 	 * @since v0.1
 	 */
-	publicFns.consoleLogger = function(name) {
-		if(loggers[name] != undefined) {
+	publicFns.consoleLogger = function (name) {
+		if (loggers[name] !== undefined && loggers[name] !== null) {
 			loggers[name].addAppender(publicFns.defaultConsoleAppender);
 			return loggers[name];
 		}
@@ -142,7 +158,7 @@
 		newLog.addAppender(publicFns.defaultConsoleAppender);
 		loggers[name] = newLog;
 		return newLog;
-	}
+	};
 
 	/**
 	 * The default console appender, this formats a message as
@@ -151,43 +167,88 @@
 	 * @param  {String} level the name of the level
 	 * @param  {Array} args  the arguments passed by the user
 	 */
-	publicFns.defaultConsoleAppender = function(name, level, args) {
-		if(console) {
-			args.unshift(name + ':' + level + ' ->');
-			Function.prototype.apply.call(console.log, console, args);
+	publicFns.defaultConsoleAppender = function (name, level, args) {
+		if (console && console.log) {
+
+			// For those Console that don't have a real "level" link back to console.log
+			if (!console[level]) { console[level] = console.log; }
+
+			if (publicFns.useColors && colors[level]) {
+				args.unshift('color: '+colors[level]);
+				args.unshift('%c'+name + ':' + level + ' ->');
+
+			} else {
+				args.unshift(name + ':' + level + ' ->');
+			}
+			Function.prototype.apply.call(console[level], console, args);
 		}
-	}
+	};
+
+	/**
+	 * color - Set/get the color used for different logging levels
+	 * @param level (either SimplyLog const or text)
+	 * @param color
+	 * @returns color of level, or null if invalid logging level
+	 */
+	publicFns.color = function(level, color) {
+		var intLevel = parseInt(level,10), lowerLevel=null;
+
+		// Figure out which "Level" it is
+		if (isNaN(intLevel)) {
+			lowerLevel = level.toLowerCase();
+		} else {
+			for (var key in types) {
+				if (types.hasOwnProperty(key)) {
+					if (types[key] === intLevel) {
+						lowerLevel = types[key];
+						break;
+					}
+				}
+			}
+		}
+
+		if (!colors[lowerLevel]) {
+			return null;
+		}
+		if (color !== null && color !== undefined && color.length >= 3) {
+			if (color[0] !== '#') {
+				colors[lowerLevel] = '#'+color;
+			} else {
+				colors[lowerLevel] = color;
+			}
+		}
+		return colors[lowerLevel];
+	};
 
 	/**
 	 * Adds another default appender that will be added to all new loggers
-	 * @param {Function} The appender to add
+	 * @param appender The appender function to add
 	 * @since 0.2.4
 	 */
-	publicFns.addDefaultAppender = function(appender) {
+	publicFns.addDefaultAppender = function (appender) {
 		defaultAppenders.push(appender);
 		return publicFns;
-	}
+	};
 
 	/**
 	 * Sets the default level for all logs built from this, these can be overridden manually
 	 * @param {Integer} level Level to set logging at
 	 */
-	publicFns.setDefaultLevel = function(level) {
+	publicFns.setDefaultLevel = function (level) {
 		defaultLevel = level;
 		return publicFns;
-	}
+	};
 
-	var defaultLevel = types.INFO;
-	for(var propName in types) { publicFns[propName.toUpperCase()] = types[propName]; }
 
-	if (typeof exports !== 'undefined') {
-		if (typeof module !== 'undefined' && module.exports) {
-			exports = module.exports = publicFns;
+	for (var propName in types) {
+		if (types.hasOwnProperty(propName)) {
+			publicFns[propName.toUpperCase()] = types[propName];
 		}
-
-		exports = publicFns;
-	} else {
-		root['SimplyLog'] = publicFns;
 	}
+	var defaultLevel = types.info;
 
-}).call(this);
+
+
+
+
+}(typeof exports === 'undefined' ? window.SimplyLog = {} : exports));
