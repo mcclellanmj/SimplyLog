@@ -3,11 +3,11 @@
 	"description" : "An attempt at a extremely simple logger, which is easy to extend with code and not silly config.",
 	"keywords" : ["util", "log", "logger", "system", "client"],
 	"author" : "Matt McClellan <mcclellan.mj@gmail.com>",
-	"contributors" : [],
+	"contributors" : ["Nathanael Anderson"],
 	"dependencies" : [],
 	"repository" : {"type" : "git", "url" : "git://github.com/mcclellanmj/SimplyLog.git"},
 	"main" : "simply-log.js",
-	"version" : "0.2.5",
-	"license": "GPL",
+	"version" : "0.2.6",
+	"license": "BSD",
 	"homepage" : "https://github.com/mcclellanmj/SimplyLog"
 }
