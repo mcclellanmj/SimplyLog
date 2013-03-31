@@ -4,10 +4,8 @@
  */
 
 /**
- * @version v0.2.1
- * Api is likely to change
+ * @version v0.2.6
  * @author MATT MCCLELLAN
- * @beta
  *
  * This is a simple wrapper around console.log that allows you to control level
  * The functions available to this are
@@ -19,17 +17,10 @@
  * The hierarchy of the loggers are listed below with
  * SimplyLog.OFF -- turns off all logging
  * SimplyLog.ERROR -- Error level logging, highest level, always outputs unless off
- * SimplyLog.INFO -- Info level logging, highest level
+ * SimplyLog.INFO -- Info level logging
  * SimplyLog.WARN -- Warnings
  * SimplyLog.DEBUG -- Debug level
  * SimplyLog.TRACE -- Ultra verbose trace logging
- *
- * Once you have a logger the following functions can be called
- * log.info(msg)
- * log.debug(msg)
- * log.error(msg)
- * log.trace(msg)
- * @return SimplyLog object
  *
  */
 
@@ -41,8 +32,6 @@
 	// OFF is just a really low setting
 	publicFns.OFF = Number.MIN_VALUE;
 	publicFns.useColors = false;
-
-
 
 	var types = {
 		'error': 1,
@@ -63,8 +52,8 @@
 	/**
 	 * Logger object contains methods to be used for logging such as
 	 * info, error, etc.  As well as a method to change logging, setLogLevel
-	 * @param  String name  name of logger to create
-	 * @param  Integer level level of logging
+	 * @param  {String} name  name of logger to create
+	 * @param  {Integer} level level of logging
 	 * @return functions to interact with the log
 	 */
 	var Logger = (function () {
@@ -128,7 +117,7 @@
 
 	/**
 	 * getLogger - returns an existing logger of this name, or creates a new logger of this name
-	 * @param name
+	 * @param {String} name
 	 * @returns Logger
 	 */
 	publicFns.getLogger = function (name) {
@@ -141,12 +130,12 @@
 	};
 
 	/**
-	 * Creates a console logger, this may have more appenders than just console but it is
-	 * guaranteed to have at least a default console logger
-	 * @param  String name  name of the logger to create
-	 * @param  Integer level initial logging level
-	 * @return Logger       log object @see logger
-	 * @since v0.1
+	 * Creates a console logger, this may have more appenders depending on what other default appenders were set
+	 * but it is guaranteed to have at least a default console logger appender
+	 *
+	 * @param  {String} name  name of the logger to create
+	 * @param  {Integer} level initial logging level
+	 * @return {Logger}       log object @see logger
 	 */
 	publicFns.consoleLogger = function (name) {
 		if (loggers[name] !== undefined && loggers[name] !== null) {
@@ -221,8 +210,9 @@
 	};
 
 	/**
-	 * Adds another default appender that will be added to all new loggers
-	 * @param appender The appender function to add
+	 * Adds another default appender that will be added to all new loggers, this will not affect any 
+	 * loggers that were already created before with getLogger
+	 * @param {function} appender The appender function to add
 	 * @since 0.2.4
 	 */
 	publicFns.addDefaultAppender = function (appender) {
@@ -231,7 +221,7 @@
 	};
 
 	/**
-	 * Sets the default level for all logs built from this, these can be overridden manually
+	 * Sets the default level for all logs built from this, these can be overridden manually.
 	 * @param {Integer} level Level to set logging at
 	 */
 	publicFns.setDefaultLevel = function (level) {
@@ -246,9 +236,4 @@
 		}
 	}
 	var defaultLevel = types.info;
-
-
-
-
-
 }(typeof exports === 'undefined' ? window.SimplyLog = {} : exports));

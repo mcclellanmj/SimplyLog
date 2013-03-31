@@ -2,11 +2,7 @@ SimplyLog
 =====
 - - -
 SimplyLog is a project meant to bring flexible and controllable logging into javascript.
-The primary goals are extensibility, simplicity, and compatibility.  Something that allows developers to quickly turn logging on and off as they are debugging a site, and even control
-the amount of logging that gets output.  In addition to allowing a developer or a team 
-to attach more information to the debugging.  And for teams allowing a standard logging style to be setup for their projects.
-
-And lastly the syntax and API is intended to be as clear and easy to use as possible.
+The primary goals are extensibility, simplicity, and compatibility.  This tool is intended to allow developers to quickly turn logging on and off as they are debugging a site.  SimplyLog also provides a way to attach more than just a console appender which can be used to log to a remote server, a file, or whatever else comes up as a log container.  As of now the only appender provided is the console but contributions for more appenders will gladly be accepted.
 
 Usage
 -----
@@ -108,7 +104,7 @@ The arguments for the function you pass are
 
 Appenders
 ---------
-Appenders are a way of allowing the log system to be extended, anything you can code can be called as an appender.  Any number of appenders can be added to a logger to allow  Tutorial and more complex appenders to come, to get started now take a look at the defaultConsoleAppender in `simply-log.js`, or take a look at the example below which is a copy of the defaultConsoleAppender but adds the timestamp.  Please note that adding more default appenders but using SimplyLog.consoleAppender will cause you to get a consoleAppender with all extra default appenders attached as well.
+Appenders are a way of allowing the log system to be extended, anything you can code can be called as an appender.  Any number of appenders can be added to a logger to allow  Tutorial and more complex appenders to come, to get started now take a look at the defaultConsoleAppender in `simply-log.js`, or take a look at the example below which is a copy of the defaultConsoleAppender but adds the timestamp.
 
 	var logFactory = require('simply-log');
 
